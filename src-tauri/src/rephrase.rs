@@ -18,13 +18,20 @@ use serde::Serialize;
 use tauri::{AppHandle, Emitter, Manager};
 
 use crate::actions::{strip_invisible_chars, strip_think_block};
-use crate::settings::{get_settings, AppSettings, ShortcutBinding, APPLE_INTELLIGENCE_PROVIDER_ID};
+use crate::settings::{
+    get_settings, AppSettings, KeyboardImplementation, ShortcutBinding,
+    APPLE_INTELLIGENCE_PROVIDER_ID,
+};
 use crate::shortcut;
 use crate::transcription_coordinator::is_transcribe_binding;
 use crate::utils;
 
 pub const REPHRASE_UP_BINDING: &str = "rephrase_up";
 pub const REPHRASE_DOWN_BINDING: &str = "rephrase_down";
+// macOS tags arrow-key events with the Fn flag and handy-keys matches Fn
+// exactly, so the plain arrows alone never fire there.
+pub const REPHRASE_UP_FN_BINDING: &str = "rephrase_up_fn";
+pub const REPHRASE_DOWN_FN_BINDING: &str = "rephrase_down_fn";
 pub const REPHRASE_DISMISS_BINDING: &str = "rephrase_dismiss";
 
 const REPHRASE_TIMEOUT: Duration = Duration::from_secs(15);
@@ -303,20 +310,26 @@ fn panel_bindings(app: &AppHandle) -> Vec<ShortcutBinding> {
         .map(|b| b.current_binding.clone())
         .filter(|b| !b.trim().is_empty())
         .unwrap_or_else(|| "escape".to_string());
-    [
+    let mut keys = vec![
         (REPHRASE_UP_BINDING, "up".to_string()),
         (REPHRASE_DOWN_BINDING, "down".to_string()),
         (REPHRASE_DISMISS_BINDING, dismiss_key),
-    ]
-    .into_iter()
-    .map(|(id, key)| ShortcutBinding {
-        id: id.to_string(),
-        name: id.to_string(),
-        description: String::new(),
-        default_binding: key.clone(),
-        current_binding: key,
-    })
-    .collect()
+    ];
+    if cfg!(target_os = "macos")
+        && get_settings(app).keyboard_implementation == KeyboardImplementation::HandyKeys
+    {
+        keys.push((REPHRASE_UP_FN_BINDING, "fn+up".to_string()));
+        keys.push((REPHRASE_DOWN_FN_BINDING, "fn+down".to_string()));
+    }
+    keys.into_iter()
+        .map(|(id, key)| ShortcutBinding {
+            id: id.to_string(),
+            name: id.to_string(),
+            description: String::new(),
+            default_binding: key.clone(),
+            current_binding: key,
+        })
+        .collect()
 }
 
 /// Register ↑/↓/Esc if the choice `id` is still pending. Runs off the hotkey
@@ -423,7 +436,11 @@ pub fn handle_shortcut(app: &AppHandle, binding_id: &str, is_pressed: bool) -> b
 
     let is_panel_key = matches!(
         binding_id,
-        REPHRASE_UP_BINDING | REPHRASE_DOWN_BINDING | REPHRASE_DISMISS_BINDING
+        REPHRASE_UP_BINDING
+            | REPHRASE_DOWN_BINDING
+            | REPHRASE_UP_FN_BINDING
+            | REPHRASE_DOWN_FN_BINDING
+            | REPHRASE_DISMISS_BINDING
     );
     if !state.is_pending() {
         // A panel key can still fire in the moment before it is unregistered.
@@ -443,8 +460,12 @@ pub fn handle_shortcut(app: &AppHandle, binding_id: &str, is_pressed: bool) -> b
     }
 
     match binding_id {
-        REPHRASE_UP_BINDING | REPHRASE_DOWN_BINDING => {
-            if let Some(view) = state.move_selection(binding_id == REPHRASE_DOWN_BINDING) {
+        REPHRASE_UP_BINDING
+        | REPHRASE_DOWN_BINDING
+        | REPHRASE_UP_FN_BINDING
+        | REPHRASE_DOWN_FN_BINDING => {
+            let down = matches!(binding_id, REPHRASE_DOWN_BINDING | REPHRASE_DOWN_FN_BINDING);
+            if let Some(view) = state.move_selection(down) {
                 emit_view(app, &view);
             }
             true
@@ -541,6 +562,13 @@ mod tests {
         assert!(!state.take_swallow_release("other"));
         assert!(state.take_swallow_release("transcribe"));
         assert!(!state.take_swallow_release("transcribe"));
+    }
+
+    #[test]
+    fn panel_key_strings_parse() {
+        for key in ["up", "down", "fn+up", "fn+down", "escape"] {
+            assert!(key.parse::<handy_keys::Hotkey>().is_ok(), "{key}");
+        }
     }
 
     #[test]
