@@ -908,7 +908,7 @@ pub const REPHRASE_PANEL_LABEL: &str = "rephrase_panel";
 // Logical size of the panel window. The card inside is CSS-anchored to the
 // edge nearest the screen edge, so shorter content does not float.
 const REPHRASE_PANEL_WIDTH: f64 = 520.0;
-const REPHRASE_PANEL_HEIGHT: f64 = 200.0;
+const REPHRASE_PANEL_HEIGHT: f64 = 300.0;
 
 /// Creates the rephrase panel and keeps it hidden. It never takes focus, so
 /// the app the user is dictating into stays focused for the paste.

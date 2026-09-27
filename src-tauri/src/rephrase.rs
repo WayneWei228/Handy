@@ -34,7 +34,7 @@ pub const REPHRASE_UP_FN_BINDING: &str = "rephrase_up_fn";
 pub const REPHRASE_DOWN_FN_BINDING: &str = "rephrase_down_fn";
 pub const REPHRASE_DISMISS_BINDING: &str = "rephrase_dismiss";
 
-const REPHRASE_TIMEOUT: Duration = Duration::from_secs(15);
+const REPHRASE_TIMEOUT: Duration = Duration::from_secs(25);
 
 pub const DEFAULT_PROMPT: &str =
     "You rewrite English sentences so they sound like a fluent native \

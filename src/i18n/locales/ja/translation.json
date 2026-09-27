@@ -454,11 +454,11 @@
         "createFirst": "上の「新しいプロンプトを作成」をクリックして、最初の後処理プロンプトを作成してください。"
       },
       "nativeRephrase": {
-        "groupTitle": "Native Rephrase",
-        "title": "Native Rephrase Panel",
-        "description": "After you dictate, show your sentence next to a native-speaker rewrite from the AI provider below. Choose with ↑/↓, then press the transcribe shortcut again to paste. Esc dismisses.",
-        "promptTitle": "Rephrase Prompt",
-        "promptDescription": "Instructions sent to the AI with each sentence you dictate. Leave it as the default or change the style, e.g. more casual or more formal.",
+        "groupTitle": "Rewrite Panel",
+        "title": "Rewrite Panel",
+        "description": "After you dictate, show your sentence next to an AI rewrite made with the prompt below and the AI provider on this page. Choose with ↑/↓, then press the transcribe shortcut again to paste. Esc dismisses.",
+        "promptTitle": "Rewrite Prompt",
+        "promptDescription": "Instructions sent to the AI with each dictation. Paste any prompt for your use case, e.g. sound like a native speaker, turn it into bullet points, or make the meaning clearer. End it with something like \"Output only the rewritten text.\" The reset button restores the default (native-speaker rewrite).",
         "resetPrompt": "Reset to default prompt"
       }
     },
@@ -725,10 +725,10 @@
   },
   "rephrasePanel": {
     "original": "You",
-    "native": "Native",
-    "loading": "Rephrasing…",
-    "alreadyNatural": "Already natural ✓",
-    "error": "Rephrase unavailable: {{error}}",
+    "native": "AI",
+    "loading": "Rewriting…",
+    "alreadyNatural": "No changes suggested",
+    "error": "Rewrite unavailable: {{error}}",
     "hint": "↑↓ choose · shortcut to paste · esc to dismiss"
   }
 }

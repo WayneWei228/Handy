@@ -72,10 +72,11 @@
   font-size: 14px;
   line-height: 1.35;
   overflow-wrap: anywhere;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+  /* Keep line breaks so structured rewrites (lists, paragraphs) read right;
+     long ones scroll inside the row instead of growing the panel. */
+  white-space: pre-wrap;
+  max-height: 7.5em;
+  overflow-y: auto;
 }
 .rp-loading {
   color: var(--rp-muted);
