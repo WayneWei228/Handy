@@ -700,6 +700,8 @@ pub fn run(cli_args: CliArgs) {
             shortcut::change_vad_backend_setting,
             shortcut::change_filler_word_removal_enabled_setting,
             shortcut::change_native_rephrase_enabled_setting,
+            shortcut::change_native_rephrase_prompt_setting,
+            shortcut::get_default_native_rephrase_prompt,
             shortcut::change_app_language_setting,
             shortcut::change_update_checks_setting,
             shortcut::change_show_whats_new_on_update_setting,

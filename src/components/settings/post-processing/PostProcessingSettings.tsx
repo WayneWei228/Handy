@@ -22,6 +22,7 @@ import { usePostProcessProviderState } from "../PostProcessingSettingsApi/usePos
 import { ShortcutInput } from "../ShortcutInput";
 import { useSettings } from "../../../hooks/useSettings";
 import { NativeRephraseToggle } from "../NativeRephraseToggle";
+import { NativeRephrasePrompt } from "../NativeRephrasePrompt";
 
 const PostProcessingSettingsApiComponent: React.FC = () => {
   const { t } = useTranslation();
@@ -434,6 +435,7 @@ export const PostProcessingSettings: React.FC = () => {
         title={t("settings.postProcessing.nativeRephrase.groupTitle")}
       >
         <NativeRephraseToggle descriptionMode="tooltip" grouped={true} />
+        <NativeRephrasePrompt />
       </SettingsGroup>
 
       <SettingsGroup title={t("settings.postProcessing.hotkey.title")}>

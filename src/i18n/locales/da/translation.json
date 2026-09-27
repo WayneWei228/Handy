@@ -456,7 +456,10 @@
       "nativeRephrase": {
         "groupTitle": "Native Rephrase",
         "title": "Native Rephrase Panel",
-        "description": "After you dictate, show your sentence next to a native-speaker rewrite from the AI provider below. Choose with ↑/↓, then press the transcribe shortcut again to paste. Esc dismisses."
+        "description": "After you dictate, show your sentence next to a native-speaker rewrite from the AI provider below. Choose with ↑/↓, then press the transcribe shortcut again to paste. Esc dismisses.",
+        "promptTitle": "Rephrase Prompt",
+        "promptDescription": "Instructions sent to the AI with each sentence you dictate. Leave it as the default or change the style, e.g. more casual or more formal.",
+        "resetPrompt": "Reset to default prompt"
       }
     },
     "history": {

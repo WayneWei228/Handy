@@ -184,6 +184,10 @@ const settingUpdaters: {
     commands.changeFillerWordRemovalEnabledSetting(value as boolean),
   native_rephrase_enabled: (value) =>
     commands.changeNativeRephraseEnabledSetting(value as boolean),
+  native_rephrase_prompt: (value) =>
+    commands.changeNativeRephrasePromptSetting(
+      (value as string | null) ?? null,
+    ),
   show_tray_icon: (value) =>
     commands.changeShowTrayIconSetting(value as boolean),
   transcribe_accelerator: (value) =>

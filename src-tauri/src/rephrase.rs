@@ -36,7 +36,8 @@ pub const REPHRASE_DISMISS_BINDING: &str = "rephrase_dismiss";
 
 const REPHRASE_TIMEOUT: Duration = Duration::from_secs(15);
 
-const SYSTEM_PROMPT: &str = "You rewrite English sentences so they sound like a fluent native \
+pub const DEFAULT_PROMPT: &str =
+    "You rewrite English sentences so they sound like a fluent native \
 speaker said them. Keep the original meaning, tone, and level of formality. Fix grammar, word \
 choice, and unnatural phrasing. Do not add new information. Output only the rewritten text, with \
 no quotes, labels, or explanations.";
@@ -221,7 +222,19 @@ fn is_already_natural(original: &str, native: &str) -> bool {
 }
 
 /// Ask the active post-processing provider for a native-speaker rewrite.
+/// The user's custom rephrase prompt, or the built-in default.
+fn system_prompt(settings: &AppSettings) -> String {
+    settings
+        .native_rephrase_prompt
+        .as_deref()
+        .map(str::trim)
+        .filter(|p| !p.is_empty())
+        .unwrap_or(DEFAULT_PROMPT)
+        .to_string()
+}
+
 async fn request_rephrase(settings: &AppSettings, text: &str) -> Result<String, String> {
+    let system_prompt = system_prompt(settings);
     let provider = settings
         .active_post_process_provider()
         .cloned()
@@ -243,7 +256,7 @@ async fn request_rephrase(settings: &AppSettings, text: &str) -> Result<String, 
             }
             let token_limit = model.trim().parse::<i32>().unwrap_or(0);
             return crate::apple_intelligence::process_text_with_system_prompt(
-                SYSTEM_PROMPT,
+                &system_prompt,
                 text,
                 token_limit,
             )
@@ -267,7 +280,7 @@ async fn request_rephrase(settings: &AppSettings, text: &str) -> Result<String, 
             api_key,
             model.trim(),
             text.to_string(),
-            Some(SYSTEM_PROMPT.to_string()),
+            Some(system_prompt.clone()),
         )
         .await?
         .ok_or("empty response")?;
@@ -284,7 +297,7 @@ async fn request_rephrase(settings: &AppSettings, text: &str) -> Result<String, 
         api_key,
         &model,
         text.to_string(),
-        Some(SYSTEM_PROMPT.to_string()),
+        Some(system_prompt.clone()),
         None,
         disable_reasoning,
     )
@@ -562,6 +575,16 @@ mod tests {
         assert!(!state.take_swallow_release("other"));
         assert!(state.take_swallow_release("transcribe"));
         assert!(!state.take_swallow_release("transcribe"));
+    }
+
+    #[test]
+    fn custom_prompt_falls_back_to_default() {
+        let mut settings = crate::settings::get_default_settings();
+        assert_eq!(system_prompt(&settings), DEFAULT_PROMPT);
+        settings.native_rephrase_prompt = Some("   ".into());
+        assert_eq!(system_prompt(&settings), DEFAULT_PROMPT);
+        settings.native_rephrase_prompt = Some(" Make it casual. ".into());
+        assert_eq!(system_prompt(&settings), "Make it casual.");
     }
 
     #[test]
