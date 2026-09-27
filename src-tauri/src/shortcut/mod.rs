@@ -1312,6 +1312,15 @@ pub async fn change_vad_backend_setting(app: AppHandle, backend: VadBackend) -> 
 
 #[tauri::command]
 #[specta::specta]
+pub fn change_native_rephrase_enabled_setting(app: AppHandle, enabled: bool) -> Result<(), String> {
+    let mut settings = settings::get_settings(&app);
+    settings.native_rephrase_enabled = enabled;
+    settings::write_settings(&app, settings);
+    Ok(())
+}
+
+#[tauri::command]
+#[specta::specta]
 pub fn change_filler_word_removal_enabled_setting(
     app: AppHandle,
     enabled: bool,

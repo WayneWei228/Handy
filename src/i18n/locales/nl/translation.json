@@ -452,6 +452,11 @@
         "cancel": "Annuleren",
         "selectToEdit": "Selecteer hierboven een prompt om de details te bekijken en te bewerken.",
         "createFirst": "Klik hierboven op 'Nieuwe prompt maken' om je eerste naverwerkingsprompt aan te maken."
+      },
+      "nativeRephrase": {
+        "groupTitle": "Native Rephrase",
+        "title": "Native Rephrase Panel",
+        "description": "After you dictate, show your sentence next to a native-speaker rewrite from the AI provider below. Choose with ↑/↓, then press the transcribe shortcut again to paste. Esc dismisses."
       }
     },
     "history": {
@@ -714,5 +719,13 @@
     "learnMore": "Hoe je dit oplost",
     "recorderBlocked": "Sneltoetsen kunnen nu niet worden opgenomen — Secure Input van macOS blokkeert toetsgebeurtenissen. Los eerst de Secure Input-waarschuwing op.",
     "dismiss": "Sluiten"
+  },
+  "rephrasePanel": {
+    "original": "You",
+    "native": "Native",
+    "loading": "Rephrasing…",
+    "alreadyNatural": "Already natural ✓",
+    "error": "Rephrase unavailable: {{error}}",
+    "hint": "↑↓ choose · shortcut to paste · esc to dismiss"
   }
 }

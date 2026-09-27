@@ -429,6 +429,11 @@
         "cancel": "إلغاء",
         "selectToEdit": ".اختر مطالبة أعلاه لعرض وتعديل تفاصيلها",
         "createFirst": ".انقر على 'إنشاء مطالبة جديدة' أعلاه لإنشاء أول مطالبة معالجة لاحقة لك"
+      },
+      "nativeRephrase": {
+        "groupTitle": "Native Rephrase",
+        "title": "Native Rephrase Panel",
+        "description": "After you dictate, show your sentence next to a native-speaker rewrite from the AI provider below. Choose with ↑/↓, then press the transcribe shortcut again to paste. Esc dismisses."
       }
     },
     "history": {
@@ -714,5 +719,13 @@
     "learnMore": "كيفية الإصلاح",
     "recorderBlocked": "لا يمكن تسجيل الاختصارات الآن — يحجب Secure Input في macOS أحداث المفاتيح. عالج تحذير Secure Input أولاً.",
     "dismiss": "تجاهل"
+  },
+  "rephrasePanel": {
+    "original": "You",
+    "native": "Native",
+    "loading": "Rephrasing…",
+    "alreadyNatural": "Already natural ✓",
+    "error": "Rephrase unavailable: {{error}}",
+    "hint": "↑↓ choose · shortcut to paste · esc to dismiss"
   }
 }

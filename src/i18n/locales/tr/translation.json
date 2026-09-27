@@ -452,6 +452,11 @@
         "cancel": "İptal",
         "selectToEdit": "Ayrıntılarını görüntülemek ve düzenlemek için yukarıdan bir prompt seçin.",
         "createFirst": "İlk son işlem promptunuzu oluşturmak için yukarıdaki “Yeni Prompt Oluştur” seçeneğine tıklayın."
+      },
+      "nativeRephrase": {
+        "groupTitle": "Native Rephrase",
+        "title": "Native Rephrase Panel",
+        "description": "After you dictate, show your sentence next to a native-speaker rewrite from the AI provider below. Choose with ↑/↓, then press the transcribe shortcut again to paste. Esc dismisses."
       }
     },
     "history": {
@@ -714,5 +719,13 @@
     "learnMore": "Bu nasıl düzeltilir",
     "recorderBlocked": "Şu anda kısayol kaydedilemiyor — macOS Secure Input tuş olaylarını engelliyor. Önce Secure Input uyarısını giderin.",
     "dismiss": "Kapat"
+  },
+  "rephrasePanel": {
+    "original": "You",
+    "native": "Native",
+    "loading": "Rephrasing…",
+    "alreadyNatural": "Already natural ✓",
+    "error": "Rephrase unavailable: {{error}}",
+    "hint": "↑↓ choose · shortcut to paste · esc to dismiss"
   }
 }

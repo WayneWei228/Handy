@@ -452,6 +452,11 @@
         "cancel": "Annulla",
         "selectToEdit": "Scegli un prompt qui sopra per visualizzare o modificare i dettagli.",
         "createFirst": "Clicca 'Crea un nuovo prompt' qui sopra per creare il tuo primo prompt di post-elaborazione."
+      },
+      "nativeRephrase": {
+        "groupTitle": "Native Rephrase",
+        "title": "Native Rephrase Panel",
+        "description": "After you dictate, show your sentence next to a native-speaker rewrite from the AI provider below. Choose with ↑/↓, then press the transcribe shortcut again to paste. Esc dismisses."
       }
     },
     "history": {
@@ -714,5 +719,13 @@
     "learnMore": "Come risolvere",
     "recorderBlocked": "Non è possibile registrare scorciatoie in questo momento: Secure Input di macOS sta bloccando gli eventi dei tasti. Risolvi prima l'avviso di Secure Input.",
     "dismiss": "Ignora"
+  },
+  "rephrasePanel": {
+    "original": "You",
+    "native": "Native",
+    "loading": "Rephrasing…",
+    "alreadyNatural": "Already natural ✓",
+    "error": "Rephrase unavailable: {{error}}",
+    "hint": "↑↓ choose · shortcut to paste · esc to dismiss"
   }
 }

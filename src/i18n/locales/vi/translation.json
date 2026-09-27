@@ -452,6 +452,11 @@
         "cancel": "Hủy",
         "selectToEdit": "Chọn một prompt ở trên để xem và chỉnh sửa chi tiết.",
         "createFirst": "Nhấn 'Tạo Prompt mới' ở trên để tạo prompt xử lý sau đầu tiên của bạn."
+      },
+      "nativeRephrase": {
+        "groupTitle": "Native Rephrase",
+        "title": "Native Rephrase Panel",
+        "description": "After you dictate, show your sentence next to a native-speaker rewrite from the AI provider below. Choose with ↑/↓, then press the transcribe shortcut again to paste. Esc dismisses."
       }
     },
     "history": {
@@ -714,5 +719,13 @@
     "learnMore": "Cách khắc phục",
     "recorderBlocked": "Hiện không thể ghi phím tắt — Secure Input của macOS đang chặn các sự kiện phím. Hãy xử lý cảnh báo Secure Input trước.",
     "dismiss": "Bỏ qua"
+  },
+  "rephrasePanel": {
+    "original": "You",
+    "native": "Native",
+    "loading": "Rephrasing…",
+    "alreadyNatural": "Already natural ✓",
+    "error": "Rephrase unavailable: {{error}}",
+    "hint": "↑↓ choose · shortcut to paste · esc to dismiss"
   }
 }

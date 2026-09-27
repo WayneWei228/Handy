@@ -31,6 +31,13 @@ tauri_panel! {
             is_floating_panel: true
         }
     })
+
+    panel!(RephrasePanel {
+        config: {
+            can_become_key_window: false,
+            is_floating_panel: true
+        }
+    })
 }
 
 // Native overlay window sizes (logical points). One window is reused for every
@@ -889,4 +896,110 @@ mod tests {
         // Top offset rides the DPI scale alone, so the top edge doesn't move.
         assert_eq!(top_y, -195);
     }
+}
+
+// ============================================================================
+// Native rephrase panel
+// ============================================================================
+
+/// Window label of the native rephrase panel (see `rephrase.rs`).
+pub const REPHRASE_PANEL_LABEL: &str = "rephrase_panel";
+
+// Logical size of the panel window. The card inside is CSS-anchored to the
+// edge nearest the screen edge, so shorter content does not float.
+const REPHRASE_PANEL_WIDTH: f64 = 520.0;
+const REPHRASE_PANEL_HEIGHT: f64 = 200.0;
+
+/// Creates the rephrase panel and keeps it hidden. It never takes focus, so
+/// the app the user is dictating into stays focused for the paste.
+#[cfg(target_os = "macos")]
+pub fn create_rephrase_panel(app_handle: &AppHandle) {
+    let (x, y) =
+        calculate_overlay_position(app_handle, REPHRASE_PANEL_WIDTH, REPHRASE_PANEL_HEIGHT)
+            .unwrap_or((0.0, 0.0));
+    match PanelBuilder::<_, RephrasePanel>::new(app_handle, REPHRASE_PANEL_LABEL)
+        .url(WebviewUrl::App("src/rephrase/index.html".into()))
+        .title("Rephrase")
+        .position(tauri::Position::Logical(tauri::LogicalPosition { x, y }))
+        .level(PanelLevel::Status)
+        .size(tauri::Size::Logical(tauri::LogicalSize {
+            width: REPHRASE_PANEL_WIDTH,
+            height: REPHRASE_PANEL_HEIGHT,
+        }))
+        .has_shadow(false)
+        .transparent(true)
+        .no_activate(true)
+        .corner_radius(0.0)
+        .style_mask(StyleMask::empty().borderless().nonactivating_panel())
+        .with_window(|w| w.decorations(false).transparent(true).focusable(false))
+        .collection_behavior(
+            CollectionBehavior::new()
+                .can_join_all_spaces()
+                .full_screen_auxiliary(),
+        )
+        .build()
+    {
+        Ok(panel) => panel.hide(),
+        Err(e) => log::error!("Failed to create rephrase panel: {}", e),
+    }
+}
+
+/// Creates the rephrase panel and keeps it hidden.
+#[cfg(not(target_os = "macos"))]
+pub fn create_rephrase_panel(app_handle: &AppHandle) {
+    let mut builder = WebviewWindowBuilder::new(
+        app_handle,
+        REPHRASE_PANEL_LABEL,
+        tauri::WebviewUrl::App("src/rephrase/index.html".into()),
+    )
+    .title("Rephrase")
+    .resizable(false)
+    .inner_size(REPHRASE_PANEL_WIDTH, REPHRASE_PANEL_HEIGHT)
+    .shadow(false)
+    .maximizable(false)
+    .minimizable(false)
+    .closable(false)
+    .decorations(false)
+    .always_on_top(true)
+    .skip_taskbar(true)
+    .transparent(true)
+    .focusable(false)
+    .focused(false)
+    .visible(false);
+
+    if let Some(data_dir) = crate::portable::data_dir() {
+        builder = builder.data_directory(data_dir.join("webview"));
+    }
+
+    if let Err(e) = builder.build() {
+        debug!("Failed to create rephrase panel: {}", e);
+    }
+}
+
+/// Positions the rephrase panel where the recording overlay sits and shows it.
+pub fn show_rephrase_panel(app_handle: &AppHandle) {
+    let handle = app_handle.clone();
+    let _ = app_handle.run_on_main_thread(move || {
+        let Some(window) = handle.get_webview_window(REPHRASE_PANEL_LABEL) else {
+            log::warn!("Rephrase panel window is missing");
+            return;
+        };
+        if let Some((x, y)) =
+            calculate_overlay_position(&handle, REPHRASE_PANEL_WIDTH, REPHRASE_PANEL_HEIGHT)
+        {
+            let _ = window.set_position(tauri::Position::Logical(tauri::LogicalPosition { x, y }));
+        }
+        let position = settings::get_settings(&handle).overlay_position;
+        let _ = window.emit("rephrase-position", position);
+        let _ = window.show();
+    });
+}
+
+pub fn hide_rephrase_panel(app_handle: &AppHandle) {
+    let handle = app_handle.clone();
+    let _ = app_handle.run_on_main_thread(move || {
+        if let Some(window) = handle.get_webview_window(REPHRASE_PANEL_LABEL) {
+            let _ = window.hide();
+        }
+    });
 }

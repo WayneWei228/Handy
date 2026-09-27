@@ -32,6 +32,12 @@ pub fn handle_shortcut_event(
     hotkey_string: &str,
     is_pressed: bool,
 ) {
+    // While the native rephrase panel is open it owns the transcribe shortcut
+    // (paste the choice) and its own ↑/↓/Esc keys.
+    if crate::rephrase::handle_shortcut(app, binding_id, is_pressed) {
+        return;
+    }
+
     let settings = get_settings(app);
 
     // Transcribe bindings are handled by the coordinator.

@@ -490,6 +490,8 @@ pub struct AppSettings {
     pub filler_word_removal_enabled: bool,
     #[serde(default)]
     pub custom_filler_words: Option<Vec<String>>,
+    #[serde(default = "default_native_rephrase_enabled")]
+    pub native_rephrase_enabled: bool,
     #[serde(default)]
     pub transcribe_accelerator: TranscribeAcceleratorSetting,
     #[serde(default)]
@@ -582,6 +584,10 @@ fn default_vad_enabled() -> bool {
 }
 
 fn default_filler_word_removal_enabled() -> bool {
+    true
+}
+
+fn default_native_rephrase_enabled() -> bool {
     true
 }
 
@@ -963,6 +969,7 @@ pub fn get_default_settings() -> AppSettings {
         external_script_path: None,
         filler_word_removal_enabled: default_filler_word_removal_enabled(),
         custom_filler_words: None,
+        native_rephrase_enabled: default_native_rephrase_enabled(),
         transcribe_accelerator: TranscribeAcceleratorSetting::default(),
         ort_accelerator: OrtAcceleratorSetting::default(),
         transcribe_gpu_device: default_transcribe_gpu_device(),
