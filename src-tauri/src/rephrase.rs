@@ -259,7 +259,7 @@ async fn request_rephrase(settings: &AppSettings, text: &str) -> Result<String, 
         .get(&provider.id)
         .cloned()
         .unwrap_or_default();
-    let disable_reasoning = matches!(provider.id.as_str(), "custom" | "openrouter");
+    let disable_reasoning = matches!(provider.id.as_str(), "custom" | "openrouter" | "gemini");
 
     if crate::llm_client::is_bedrock_converse_model(&provider, model.trim()) {
         let reply = crate::llm_client::send_bedrock_converse(
