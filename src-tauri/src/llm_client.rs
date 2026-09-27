@@ -732,3 +732,133 @@ mod tests {
         assert!(!is_known_rejected(&endpoint_key(&deepseek, "other-model")));
     }
 }
+
+/// True when `model` is a Bedrock inference-profile or foundation-model ID
+/// (e.g. `us.anthropic.claude-opus-4-6-v1`) that must be called through the
+/// `bedrock-runtime` Converse API rather than Mantle's chat completions.
+pub fn is_bedrock_converse_model(provider: &PostProcessProvider, model: &str) -> bool {
+    provider.id == "bedrock_mantle"
+        && ["us.", "eu.", "au.", "apac.", "jp.", "global."]
+            .iter()
+            .any(|prefix| model.starts_with(prefix))
+}
+
+/// `https://bedrock-mantle.{region}.api.aws/v1` -> `{region}`.
+fn bedrock_region(provider: &PostProcessProvider) -> String {
+    provider
+        .base_url
+        .split("bedrock-mantle.")
+        .nth(1)
+        .and_then(|rest| rest.split('.').next())
+        .filter(|region| !region.is_empty())
+        .unwrap_or("us-east-1")
+        .to_string()
+}
+
+/// Send one system + user turn through the Bedrock Converse API
+/// (`bedrock-runtime`), authenticating with the same Bedrock API key.
+pub async fn send_bedrock_converse(
+    provider: &PostProcessProvider,
+    api_key: String,
+    model: &str,
+    user_content: String,
+    system_prompt: Option<String>,
+) -> Result<Option<String>, String> {
+    let url = format!(
+        "https://bedrock-runtime.{}.amazonaws.com/model/{}/converse",
+        bedrock_region(provider),
+        model
+    );
+    debug!("Sending Bedrock Converse request to: {}", url);
+
+    let mut body = serde_json::json!({
+        "messages": [{ "role": "user", "content": [{ "text": user_content }] }],
+        "inferenceConfig": { "maxTokens": 1024 },
+    });
+    if let Some(system) = system_prompt {
+        body["system"] = serde_json::json!([{ "text": system }]);
+    }
+
+    let client = create_client(provider, &api_key)?;
+    let response = client
+        .post(&url)
+        .json(&body)
+        .send()
+        .await
+        .map_err(|e| report_reqwest_error("HTTP request failed", &e))?;
+    let status = response.status();
+    let text = response
+        .text()
+        .await
+        .map_err(|e| report_reqwest_error("Failed to read response", &e))?;
+    if !status.is_success() {
+        let message = serde_json::from_str::<Value>(&text)
+            .ok()
+            .and_then(|v| v.get("message").and_then(|m| m.as_str()).map(String::from))
+            .unwrap_or(text);
+        return Err(format!("Bedrock returned {}: {}", status.as_u16(), message));
+    }
+
+    let json: Value =
+        serde_json::from_str(&text).map_err(|e| format!("Invalid Bedrock response: {}", e))?;
+    let content = json["output"]["message"]["content"]
+        .as_array()
+        .map(|parts| {
+            parts
+                .iter()
+                .filter_map(|part| part["text"].as_str())
+                .collect::<String>()
+        })
+        .filter(|s| !s.trim().is_empty());
+    Ok(content)
+}
+
+#[cfg(test)]
+mod bedrock_converse_tests {
+    use super::*;
+
+    fn mantle(base_url: &str) -> PostProcessProvider {
+        PostProcessProvider {
+            id: "bedrock_mantle".to_string(),
+            label: "AWS Bedrock (Mantle)".to_string(),
+            base_url: base_url.to_string(),
+            allow_base_url_edit: false,
+            models_endpoint: None,
+            supports_structured_output: true,
+        }
+    }
+
+    #[test]
+    fn routes_inference_profiles_to_converse() {
+        let p = mantle("https://bedrock-mantle.us-east-1.api.aws/v1");
+        assert!(is_bedrock_converse_model(
+            &p,
+            "us.anthropic.claude-opus-4-6-v1"
+        ));
+        assert!(is_bedrock_converse_model(
+            &p,
+            "global.anthropic.claude-opus-4-6-v1"
+        ));
+        assert!(!is_bedrock_converse_model(&p, "deepseek.v3.2"));
+        assert!(!is_bedrock_converse_model(&p, "anthropic.claude-haiku-4-5"));
+
+        let mut other = p.clone();
+        other.id = "openai".to_string();
+        assert!(!is_bedrock_converse_model(
+            &other,
+            "us.anthropic.claude-opus-4-6-v1"
+        ));
+    }
+
+    #[test]
+    fn parses_region_from_mantle_url() {
+        assert_eq!(
+            bedrock_region(&mantle("https://bedrock-mantle.eu-west-2.api.aws/v1")),
+            "eu-west-2"
+        );
+        assert_eq!(
+            bedrock_region(&mantle("https://example.com/v1")),
+            "us-east-1"
+        );
+    }
+}

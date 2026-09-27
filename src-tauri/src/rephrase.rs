@@ -254,6 +254,24 @@ async fn request_rephrase(settings: &AppSettings, text: &str) -> Result<String, 
         .unwrap_or_default();
     let disable_reasoning = matches!(provider.id.as_str(), "custom" | "openrouter");
 
+    if crate::llm_client::is_bedrock_converse_model(&provider, model.trim()) {
+        let reply = crate::llm_client::send_bedrock_converse(
+            &provider,
+            api_key,
+            model.trim(),
+            text.to_string(),
+            Some(SYSTEM_PROMPT.to_string()),
+        )
+        .await?
+        .ok_or("empty response")?;
+        let cleaned = clean_output(&reply);
+        return if cleaned.is_empty() {
+            Err("empty response".into())
+        } else {
+            Ok(cleaned)
+        };
+    }
+
     let reply = crate::llm_client::send_chat_completion_with_schema(
         &provider,
         api_key,
