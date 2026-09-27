@@ -169,8 +169,14 @@ enum Effect {
 
 /// Commands processed sequentially by the coordinator thread.
 enum Command {
-    Input(InputEvent),
-    Cancel { recording_was_active: bool },
+    /// A shortcut edge and when it happened. The timestamp is taken when the
+    /// event is sent, not when the coordinator thread gets to it: a slow
+    /// start (cold mic/model) would otherwise make a quick tap measure as a
+    /// hold and stop the recording immediately.
+    Input(InputEvent, Instant),
+    Cancel {
+        recording_was_active: bool,
+    },
     ProcessingFinished,
 }
 
@@ -566,8 +572,8 @@ impl TranscriptionCoordinator {
                     };
 
                     match cmd {
-                        Command::Input(input) => {
-                            if let Some(effect) = state.on_input(input, Instant::now()) {
+                        Command::Input(input, at) => {
+                            if let Some(effect) = state.on_input(input, at) {
                                 run_effect(&app, &mut state, effect);
                             }
                         }
@@ -635,14 +641,17 @@ impl TranscriptionCoordinator {
     ) {
         if self
             .tx
-            .send(Command::Input(InputEvent {
-                binding_id: binding_id.to_string(),
-                hotkey_string: hotkey_string.to_string(),
-                is_pressed,
-                mode,
-                hold_threshold,
-                external,
-            }))
+            .send(Command::Input(
+                InputEvent {
+                    binding_id: binding_id.to_string(),
+                    hotkey_string: hotkey_string.to_string(),
+                    is_pressed,
+                    mode,
+                    hold_threshold,
+                    external,
+                },
+                Instant::now(),
+            ))
             .is_err()
         {
             warn!("Transcription coordinator channel closed");
